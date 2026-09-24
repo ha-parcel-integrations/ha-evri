@@ -37,7 +37,7 @@
     "calendar": {"deliveries": {"name": "Deliveries"}},
     "sensor": {
       "incoming_parcels": {"name": "Incoming parcels", "unit_of_measurement": "parcels"},
-      "awaiting_pickup": {"name": "Ready for pickup", "unit_of_measurement": "parcels"},
+      "awaiting_pickup": {"name": "Klaar voor afhalen", "unit_of_measurement": "parcels"},
       "next_delivery": {"name": "Next delivery"},
       "delivered_parcels": {"name": "Delivered parcels", "unit_of_measurement": "parcels"},
       "outgoing_parcels": {"name": "Outgoing parcels", "unit_of_measurement": "parcels"},
