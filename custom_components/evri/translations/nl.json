@@ -1,49 +1,49 @@
 {
   "title": "Evri",
   "config": {
-    "step": {"user": {"title": "Set up Evri", "description": "Create an Evri hub for a UK delivery postcode. You can add separate hubs for home, work or family.", "data": {"postal_code": "Postcode"}, "data_description": {"postal_code": "The delivery postcode used to retrieve the parcel details available to you."}}},
-    "error": {"invalid_postcode": "Enter a valid UK postcode."},
-    "abort": {"already_configured": "An Evri hub already exists for this postcode."}
+    "step": {"user": {"title": "Evri instellen", "description": "Maak een Evri-hub aan voor een Britse bezorgpostcode. Je kunt aparte hubs toevoegen voor thuis, werk of familie.", "data": {"postal_code": "Postcode"}, "data_description": {"postal_code": "De bezorgpostcode waarmee de voor jou beschikbare pakketgegevens worden opgehaald."}}},
+    "error": {"invalid_postcode": "Voer een geldige Britse postcode in."},
+    "abort": {"already_configured": "Er bestaat al een Evri-hub voor deze postcode."}
   },
   "options": {
     "step": {
-      "init": {"title": "Evri options", "menu_options": {"incoming_parcels": "Incoming parcels", "outgoing_parcels": "Outgoing parcels", "settings": "Settings"}},
-      "incoming_parcels": {"title": "Manage incoming parcels", "description": "Tracking codes for parcels you are expecting.", "data": {"tracking_codes": "Tracking codes"}},
-      "outgoing_parcels": {"title": "Manage outgoing parcels", "description": "Tracking codes for parcels you sent.", "data": {"tracking_codes": "Tracking codes"}},
-      "settings": {"title": "Settings", "data": {"delivered_filter_type": "Filter by", "delivered_filter_amount": "Delivered parcels: amount", "include_history": "Include status history"}}
+      "init": {"title": "Evri-opties", "menu_options": {"incoming_parcels": "Inkomende pakketten", "outgoing_parcels": "Uitgaande pakketten", "settings": "Instellingen"}},
+      "incoming_parcels": {"title": "Inkomende pakketten beheren", "description": "Trackingcodes van pakketten die je verwacht.", "data": {"tracking_codes": "Trackingcodes"}},
+      "outgoing_parcels": {"title": "Uitgaande pakketten beheren", "description": "Trackingcodes van pakketten die je hebt verstuurd.", "data": {"tracking_codes": "Trackingcodes"}},
+      "settings": {"title": "Instellingen", "data": {"delivered_filter_type": "Filteren op", "delivered_filter_amount": "Bezorgde pakketten: aantal", "include_history": "Statusgeschiedenis toevoegen"}}
     },
-    "error": {"invalid_tracking_code": "The tracking code cannot be empty."}
+    "error": {"invalid_tracking_code": "De trackingcode mag niet leeg zijn."}
   },
   "selector": {
-    "delivered_filter_type": {"options": {"days": "Days", "parcels": "Number of parcels"}},
-    "direction": {"options": {"incoming": "Incoming", "outgoing": "Outgoing"}}
+    "delivered_filter_type": {"options": {"days": "Dagen", "parcels": "Aantal pakketten"}},
+    "direction": {"options": {"incoming": "Inkomend", "outgoing": "Uitgaand"}}
   },
   "services": {
-    "track_parcel": {"name": "Track parcel", "description": "Start tracking an Evri parcel.", "fields": {
-      "tracking_code": {"name": "Tracking code", "description": "The Evri tracking code."},
-      "postal_code": {"name": "Postcode", "description": "The hub postcode. Required when multiple Evri hubs exist."},
-      "direction": {"name": "Direction", "description": "Whether you are receiving or sending this parcel."}
+    "track_parcel": {"name": "Pakket volgen", "description": "Begin met het volgen van een Evri-pakket.", "fields": {
+      "tracking_code": {"name": "Trackingcode", "description": "De Evri-trackingcode."},
+      "postal_code": {"name": "Postcode", "description": "De postcode van de hub. Vereist wanneer er meerdere Evri-hubs zijn."},
+      "direction": {"name": "Richting", "description": "Of je dit pakket ontvangt of verstuurt."}
     }},
-    "untrack_parcel": {"name": "Untrack parcel", "description": "Stop tracking an Evri parcel.", "fields": {
-      "tracking_code": {"name": "Tracking code", "description": "The Evri tracking code to stop tracking."},
-      "postal_code": {"name": "Postcode", "description": "The hub postcode. Required when multiple Evri hubs exist."}
+    "untrack_parcel": {"name": "Pakket niet meer volgen", "description": "Stop met het volgen van een Evri-pakket.", "fields": {
+      "tracking_code": {"name": "Trackingcode", "description": "De Evri-trackingcode die niet meer gevolgd moet worden."},
+      "postal_code": {"name": "Postcode", "description": "De postcode van de hub. Vereist wanneer er meerdere Evri-hubs zijn."}
     }}
   },
   "device_automation": {"trigger_type": {
-    "parcel_registered": "A parcel was registered", "parcel_status_changed": "A parcel's status changed", "parcel_delivered": "A parcel was delivered", "parcel_delivery_time_changed": "A parcel's expected delivery time changed", "outgoing_parcel_status_changed": "An outgoing parcel's status changed", "outgoing_parcel_delivered": "An outgoing parcel was delivered"
+    "parcel_registered": "Een pakket is geregistreerd", "parcel_status_changed": "De status van een pakket is gewijzigd", "parcel_delivered": "Een pakket is bezorgd", "parcel_delivery_time_changed": "De verwachte bezorgtijd van een pakket is gewijzigd", "outgoing_parcel_status_changed": "De status van een verzonden pakket is gewijzigd", "outgoing_parcel_delivered": "Een verzonden pakket is bezorgd"
   }},
   "entity": {
-    "button": {"refresh": {"name": "Refresh"}},
-    "calendar": {"deliveries": {"name": "Deliveries"}},
+    "button": {"refresh": {"name": "Verversen"}},
+    "calendar": {"deliveries": {"name": "Bezorgingen"}},
     "sensor": {
-      "incoming_parcels": {"name": "Incoming parcels", "unit_of_measurement": "parcels"},
-      "awaiting_pickup": {"name": "Klaar voor afhalen", "unit_of_measurement": "parcels"},
-      "next_delivery": {"name": "Next delivery"},
-      "delivered_parcels": {"name": "Delivered parcels", "unit_of_measurement": "parcels"},
-      "outgoing_parcels": {"name": "Outgoing parcels", "unit_of_measurement": "parcels"},
-      "outgoing_delivered_parcels": {"name": "Outgoing delivered parcels", "unit_of_measurement": "parcels"},
-      "last_update": {"name": "Last successful update"},
-      "parcel": {"name": "Parcel {barcode}"}
+      "incoming_parcels": {"name": "Inkomende pakketten", "unit_of_measurement": "pakketten"},
+      "awaiting_pickup": {"name": "Klaar voor afhalen", "unit_of_measurement": "pakketten"},
+      "next_delivery": {"name": "Volgende bezorging"},
+      "delivered_parcels": {"name": "Bezorgde pakketten", "unit_of_measurement": "pakketten"},
+      "outgoing_parcels": {"name": "Uitgaande pakketten", "unit_of_measurement": "pakketten"},
+      "outgoing_delivered_parcels": {"name": "Uitgaande bezorgde pakketten", "unit_of_measurement": "pakketten"},
+      "last_update": {"name": "Laatste succesvolle update"},
+      "parcel": {"name": "Pakket {barcode}"}
     }
   }
 }
