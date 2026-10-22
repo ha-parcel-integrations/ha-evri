@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime
+import logging
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -83,8 +83,10 @@ async def async_setup_entry(
         ),
         EvriAwaitingPickupSensor(coordinator, entry),
     ]
-    for parcel in _active_parcels(coordinator):
-        entities.append(EvriParcelSensor(coordinator, entry, parcel.get("barcode", "")))
+    entities.extend(
+        EvriParcelSensor(coordinator, entry, parcel.get("barcode", ""))
+        for parcel in _active_parcels(coordinator)
+    )
     entities.append(EvriNextDeliverySensor(coordinator, entry))
     entities.append(EvriDeliveredParcelsSensor(coordinator, entry))
     entities.append(EvriOutgoingParcelsSensor(coordinator, entry))

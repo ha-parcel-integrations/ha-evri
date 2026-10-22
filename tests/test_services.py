@@ -1,7 +1,7 @@
 """Tests for multi-hub Evri services."""
 
-import pytest
 from homeassistant.exceptions import ServiceValidationError
+import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.evri.const import (

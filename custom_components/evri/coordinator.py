@@ -7,9 +7,9 @@ duplicating the mapping code.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 import hashlib
 import logging
-from datetime import datetime, timedelta, timezone
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
@@ -69,10 +69,9 @@ def _next_anchor(now: datetime) -> datetime:
     )
     if now < six_today:
         return six_today
-    midnight_tomorrow = (now + timedelta(days=1)).replace(
+    return (now + timedelta(days=1)).replace(
         hour=QUIET_WINDOW_START_HOUR, minute=0, second=0, microsecond=0
     )
-    return midnight_tomorrow
 
 
 def _hottest_tier_minutes(active_parcels: list[dict], now: datetime) -> int | None:
@@ -265,7 +264,7 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
         errors = 0
         retry_afters: list[float] = []
         saw_429 = False
-        for code, result in zip(codes_to_fetch, results):
+        for code, result in zip(codes_to_fetch, results, strict=True):
             if isinstance(result, BaseException):
                 if not isinstance(result, (EvriApiError, aiohttp.ClientError)):
                     raise result
@@ -322,8 +321,7 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
 
         if codes_to_fetch and errors == len(codes_to_fetch) and not raws_by_code:
             raise UpdateFailed(
-                "Evri's public tracking endpoint is unavailable for all tracked "
-                "parcels"
+                "Evri's public tracking endpoint is unavailable for all tracked parcels"
             )
 
         include_history = self._include_history
@@ -385,7 +383,7 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
         # succeeded (or nothing needed fetching) — a poll served entirely from
         # cache must not present itself as a successful update.
         if not codes_to_fetch or errors < len(codes_to_fetch):
-            self.last_success_time = datetime.now(timezone.utc)
+            self.last_success_time = datetime.now(UTC)
 
         now = dt_util.now()
         self._current_tier_minutes = _hottest_tier_minutes(

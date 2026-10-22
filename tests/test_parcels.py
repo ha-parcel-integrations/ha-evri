@@ -1,6 +1,6 @@
 """Tests for Evri canonical normalization."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -199,7 +199,7 @@ def test_sort_and_delivered_filters():
         options={"delivered_filter_type": "parcels", "delivered_filter_amount": 1},
     )
     assert apply_delivered_filter(parcels, entry) == parcels[:1]
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     entry = MockConfigEntry(
         domain=DOMAIN,
         options={"delivered_filter_type": "days", "delivered_filter_amount": 7},
@@ -212,5 +212,5 @@ def test_sort_and_delivered_filters():
 
 
 def test_capabilities_are_truthful():
-    assert CAPABILITIES == {"url", "history"}
+    assert {"url", "history"} == CAPABILITIES
     assert CAPABILITIES <= KNOWN_CAPABILITIES

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 import logging
-from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -114,20 +114,20 @@ def parse_iso(value: str | None) -> datetime | None:
     if not value:
         return None
     try:
-        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value))
     except (TypeError, ValueError):
         return None
-    return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
+    return parsed.replace(tzinfo=UTC) if parsed.tzinfo is None else parsed
 
 
 def to_iso_timestamp(value: Any) -> str | None:
     """Normalize ISO strings or epoch milliseconds to an ISO timestamp."""
-    global _unparseable_timestamp_logged
+    global _unparseable_timestamp_logged  # noqa: PLW0603 - one-shot warning flag
     if value is None:
         return None
     if isinstance(value, (int, float)):
         try:
-            return datetime.fromtimestamp(value / 1000, tz=timezone.utc).isoformat()
+            return datetime.fromtimestamp(value / 1000, tz=UTC).isoformat()
         except (OverflowError, OSError, ValueError):
             pass
     elif isinstance(value, str) and parse_iso(value) is not None:
@@ -244,7 +244,7 @@ def _safe_raw(
 
 def normalize_parcel(raw: dict, *, include_history: bool = False) -> dict:
     """Return the exact suite canonical shape with a privacy-minimal raw block."""
-    global _eta_shape_logged
+    global _eta_shape_logged  # noqa: PLW0603 - one-shot warning flag
     barcode = raw.get("_configuredTrackingCode")
     if not _eta_shape_logged:
         eta = next(
@@ -321,7 +321,7 @@ def sort_parcels_by_ts(
 
     def key(parcel: dict) -> tuple[bool, datetime]:
         parsed = parse_iso(parcel.get(field))
-        return (parsed is None, parsed or datetime.max.replace(tzinfo=timezone.utc))
+        return (parsed is None, parsed or datetime.max.replace(tzinfo=UTC))
 
     known = [parcel for parcel in parcels if parse_iso(parcel.get(field)) is not None]
     unknown = [parcel for parcel in parcels if parse_iso(parcel.get(field)) is None]
@@ -338,13 +338,10 @@ def apply_delivered_filter(parcels: list[dict], entry: ConfigEntry) -> list[dict
     )
     if filter_type == "parcels":
         return parcels[:amount]
-    cutoff = datetime.now(timezone.utc) - timedelta(days=amount)
+    cutoff = datetime.now(UTC) - timedelta(days=amount)
     return [
         parcel
         for parcel in parcels
-        if (
-            parse_iso(parcel.get("delivered_at"))
-            or datetime.min.replace(tzinfo=timezone.utc)
-        )
+        if (parse_iso(parcel.get("delivered_at")) or datetime.min.replace(tzinfo=UTC))
         >= cutoff
     ]
