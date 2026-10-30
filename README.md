@@ -120,6 +120,7 @@ Standard HA removal applies: **Settings → Devices & Services → Evri → ⋮ 
 | `sensor.evri_delivered_parcels` | Recently delivered parcels (see the retention option) |
 | `sensor.evri_outgoing_parcels` | Active outgoing parcels |
 | `sensor.evri_outgoing_delivered_parcels` | Recently delivered outgoing parcels |
+| `calendar.evri_deliveries` | Read-only calendar of expected deliveries, no extra API calls |
 | `sensor.evri_last_successful_update` | Diagnostic: when Evri was last polled successfully |
 
 A delivered parcel moves from its per-parcel sensor to the delivered sensor automatically.
@@ -186,7 +187,7 @@ logger:
 
 - **A parcel shows `unknown`** — Evri may not have scanned it yet, the code may be wrong, or Evri returned a stage not mapped yet.
 - **All updates suddenly fail** — Evri controls the public website credential used by its tracker and may rotate it. That requires an integration update; there is no user credential to reauthenticate.
-- **A status logs "Unrecognised Evri status"** — please [open an issue](https://github.com/ha-parcel-integrations/ha-evri/issues/new) with the logged line so the mapping can be extended.
+- **A status logs "Unrecognised Evri status"** — please [open an issue](https://github.com/ha-parcel-integrations/ha-evri/issues/new?template=unrecognised_status.yml) with the logged line so the mapping can be extended.
 
 ## Related integrations
 
