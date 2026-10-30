@@ -218,3 +218,29 @@ async def test_outgoing_delivered_event(hass):
     await coordinator._async_update_data()
     await hass.async_block_till_done()
     assert len(events) == 1
+
+
+async def test_a_parcel_the_delivered_list_leaves_out_still_fires_delivered(hass):
+    """The retention option limits the delivered sensor, never the events."""
+    first, second = ACTIVE_CODE, "SECOND000001"
+    entry = _entry([{CONF_TRACKING_CODE: first}, {CONF_TRACKING_CODE: second}])
+    entry.add_to_hass(hass)
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, "delivered_filter_amount": 1}
+    )
+    client = AsyncMock()
+    coordinator = EvriCoordinator(hass, client, entry)
+
+    delivered = []
+    hass.bus.async_listen(f"{DOMAIN}_parcel_delivered", lambda e: delivered.append(e))
+
+    client.async_get_parcel.side_effect = lambda code, postcode: active_sample(
+        code, "2"
+    )
+    await coordinator._async_update_data()
+    client.async_get_parcel.side_effect = lambda code, postcode: delivered_sample(code)
+    await coordinator._async_update_data()
+    await hass.async_block_till_done()
+
+    assert sorted(e.data["barcode"] for e in delivered) == sorted([first, second])
+    assert len(coordinator.delivered) == 1
