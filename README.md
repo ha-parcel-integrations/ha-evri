@@ -115,6 +115,7 @@ Standard HA removal applies: **Settings → Devices & Services → Evri → ⋮ 
 |---|---|
 | `sensor.evri_incoming_parcels` | Number of active tracked parcels, full list under the `parcels` attribute |
 | `sensor.evri_parcel_<code>` | One per tracked parcel; state is the canonical status, attributes carry the full normalised parcel |
+| `sensor.evri_en_route_to_pickup_point` | Incoming parcels on their way to a pickup point that have not arrived yet |
 | `sensor.evri_awaiting_pickup` | Incoming parcels waiting at a pickup point |
 | `sensor.evri_next_delivery` | Earliest expected delivery moment across all active parcels |
 | `sensor.evri_delivered_parcels` | Recently delivered parcels (see the retention option) |

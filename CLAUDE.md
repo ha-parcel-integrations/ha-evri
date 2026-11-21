@@ -35,12 +35,16 @@ you act in one of these areas:
   summary+diagnostic sensors. Add a new non-parcel sensor's unique_id to the set.
 - **Per-parcel sensors are removed by the summary sensor** via
   `entity_registry.async_remove` (self-removal races and leaves ghosts).
-- **If this carrier can reach `ParcelStatus.AT_PICKUP_POINT` from a real raw
-  status/code**, it needs an `awaiting_pickup` sensor — see *Parcel contract*
-  in `CONVENTIONS.md`. Say "pickup point", not "ServicePoint"/"parcel
-  shop"/"locker", for the generic concept. `ha-dhl-nl`, `ha-dpd`, `ha-gls`,
-  `ha-inpost` are reference implementations. Evri reaches this status through
-  its pickup-point stage codes and exposes the sensor.
+- **The pickup-point summaries are a pair.** A carrier that can deliver to a
+  pickup point or locker exposes both `en_route_to_pickup_point` and
+  `awaiting_pickup`, even before a real parcel has shown the status or flag
+  (they read 0 until then; record it in `PENDING_*`). A carrier without pickup
+  points exposes neither and keeps `pickup` constantly False.
+  See *Parcel contract* in `CONVENTIONS.md`. Say "pickup point", not
+  "ServicePoint"/"parcel shop"/"locker", for the generic concept; the
+  example carrier demonstrates both canonical sensors.
+  Evri reaches this status through its pickup-point stage codes and exposes
+  the sensor.
 
 ## Carrier-specific notes
 
@@ -58,7 +62,12 @@ you act in one of these areas:
 - `raw` is a deliberate privacy allowlist. Recipient and address data is never
   published. ETA, receiver, weight, dimensions and pickup-point name remain
   `None` until reviewed redacted fixtures establish safe semantics.
-- `awaiting_pickup` is included for parcels ready at a pickup point.
+- Both `awaiting_pickup` and `en_route_to_pickup_point` are exposed. `pickup`
+  is the `parcelShopDelivery` flag or a collection (`5_SHOP`) scan, or the
+  parcel having reached a pickup-point stage, and stays true after collection.
+  Whether `parcelShopDelivery` is set on in-flight parcels is not yet seen, so
+  `en_route_to_pickup_point` may read 0 until a real shop parcel shows it
+  (`pickup_point` is pending for the same reason: no point name is published).
 
 ## Options and reloads
 

@@ -17,6 +17,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
 from . import EvriConfigEntry
 from .const import DOMAIN, ParcelStatus
@@ -60,6 +61,7 @@ async def async_setup_entry(
     registry = er.async_get(hass)
     non_parcel_unique_ids = {
         f"{entry_id}_incoming_parcels",
+        f"{entry_id}_en_route_to_pickup_point",
         f"{entry_id}_awaiting_pickup",
         f"{entry_id}_next_delivery",
         f"{entry_id}_delivered_parcels",
@@ -81,6 +83,7 @@ async def async_setup_entry(
         EvriIncomingParcelsSensor(
             coordinator, entry, async_add_entities, current_barcodes
         ),
+        EvriEnRouteToPickupPointSensor(coordinator, entry),
         EvriAwaitingPickupSensor(coordinator, entry),
     ]
     entities.extend(
@@ -159,20 +162,56 @@ class EvriIncomingParcelsSensor(CoordinatorEntity[EvriCoordinator], SensorEntity
         super()._handle_coordinator_update()
 
 
-class EvriAwaitingPickupSensor(CoordinatorEntity[EvriCoordinator], SensorEntity):
-    """Incoming parcels ready to collect at a pickup point."""
+class _EvriPickupListSensor(CoordinatorEntity[EvriCoordinator], SensorEntity):
+    """Base for the canonical pickup-point summary views."""
 
     _attr_has_entity_name = True
-    _attr_translation_key = "awaiting_pickup"
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_attribution = ATTRIBUTION
     _unrecorded_attributes = frozenset({"parcels"})
+    _suffix: str
 
     def __init__(self, coordinator: EvriCoordinator, entry: ConfigEntry) -> None:
         """Initialize the pickup summary."""
         super().__init__(coordinator)
-        self._attr_unique_id = f"{entry.entry_id}_awaiting_pickup"
+        self._attr_unique_id = f"{entry.entry_id}_{self._suffix}"
         self._attr_device_info = build_device_info(entry)
+
+    @property
+    def native_value(self) -> int:
+        """Return the number of matching incoming parcels."""
+        return len(self._parcels())
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the matching incoming parcels."""
+        return {"parcels": self._parcels()}
+
+    def _parcels(self) -> list[dict]:
+        raise NotImplementedError
+
+
+class EvriEnRouteToPickupPointSensor(_EvriPickupListSensor):
+    """Active parcels destined for, but not yet at, a pickup point."""
+
+    _attr_translation_key = "en_route_to_pickup_point"
+    _suffix = "en_route_to_pickup_point"
+
+    def _parcels(self) -> list[dict]:
+        return [
+            p
+            for p in (self.coordinator.data or [])
+            if p.get("pickup")
+            and p.get("status")
+            not in (ParcelStatus.AT_PICKUP_POINT, ParcelStatus.RETURNING)
+        ]
+
+
+class EvriAwaitingPickupSensor(_EvriPickupListSensor):
+    """Incoming parcels ready to collect at a pickup point."""
+
+    _attr_translation_key = "awaiting_pickup"
+    _suffix = "awaiting_pickup"
 
     def _parcels(self) -> list[dict]:
         return [
@@ -180,16 +219,6 @@ class EvriAwaitingPickupSensor(CoordinatorEntity[EvriCoordinator], SensorEntity)
             for p in (self.coordinator.data or [])
             if p.get("status") == ParcelStatus.AT_PICKUP_POINT
         ]
-
-    @property
-    def native_value(self) -> int:
-        """Return the number of incoming parcels ready for pickup."""
-        return len(self._parcels())
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return incoming parcels ready for pickup."""
-        return {"parcels": self._parcels()}
 
 
 class EvriParcelSensor(CoordinatorEntity[EvriCoordinator], SensorEntity):
@@ -246,6 +275,7 @@ class EvriNextDeliverySensor(CoordinatorEntity[EvriCoordinator], SensorEntity):
 
     def _delivery_moments(self) -> list[tuple[datetime, dict]]:
         result: list[tuple[datetime, dict]] = []
+        now = dt_util.utcnow()
         for parcel in self.coordinator.data or []:
             moment = parse_iso(parcel.get("planned_from"))
             if moment is None:
@@ -253,6 +283,8 @@ class EvriNextDeliverySensor(CoordinatorEntity[EvriCoordinator], SensorEntity):
                     _LOGGER.debug(
                         "Could not parse delivery moment: %s", parcel["planned_from"]
                     )
+                continue
+            if (parse_iso(parcel.get("planned_to")) or moment) < now:
                 continue
             result.append((moment, parcel))
         return result

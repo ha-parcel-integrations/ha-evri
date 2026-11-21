@@ -7,6 +7,7 @@ from custom_components.evri.const import ParcelStatus
 from custom_components.evri.sensor import (
     EvriAwaitingPickupSensor,
     EvriDeliveredParcelsSensor,
+    EvriEnRouteToPickupPointSensor,
     EvriIncomingParcelsSensor,
     EvriLastUpdateSensor,
     EvriNextDeliverySensor,
@@ -71,12 +72,12 @@ def test_parcel_sensor_missing_barcode():
 def test_next_delivery_picks_earliest():
     coordinator = _coordinator(
         [
-            _parcel("A", planned_from="2026-05-02T10:00:00Z"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("A", planned_from="2099-05-02T10:00:00Z"),
+            _parcel("B", planned_from="2099-05-01T10:00:00Z"),
         ]
     )
     sensor = EvriNextDeliverySensor(coordinator, _entry())
-    assert sensor.native_value == datetime(2026, 5, 1, 10, 0, tzinfo=UTC)
+    assert sensor.native_value == datetime(2099, 5, 1, 10, 0, tzinfo=UTC)
     assert sensor.extra_state_attributes["barcode"] == "B"
 
 
@@ -90,7 +91,7 @@ def test_next_delivery_skips_unparseable_moment():
     coordinator = _coordinator(
         [
             _parcel("A", planned_from="not-a-date"),
-            _parcel("B", planned_from="2026-05-01T10:00:00Z"),
+            _parcel("B", planned_from="2099-05-01T10:00:00Z"),
         ]
     )
     sensor = EvriNextDeliverySensor(coordinator, _entry())
@@ -124,3 +125,32 @@ def test_pickup_and_outgoing_summaries():
     assert outgoing.native_value == 1
     assert outgoing.extra_state_attributes["parcels"][0]["barcode"] == "O"
     assert delivered.native_value == 1
+
+
+def test_next_delivery_skips_an_ended_window():
+    coordinator = _coordinator(
+        [
+            _parcel(
+                "OLD",
+                planned_from="2000-05-01T10:00:00Z",
+            ),
+            _parcel("NEW", planned_from="2099-05-01T10:00:00Z"),
+        ]
+    )
+    sensor = EvriNextDeliverySensor(coordinator, _entry())
+    assert sensor.extra_state_attributes["barcode"] == "NEW"
+
+
+def test_en_route_and_awaiting_share_no_parcel():
+    coordinator = _coordinator(
+        [
+            _parcel("E", ParcelStatus.IN_TRANSIT, True),
+            _parcel("A", ParcelStatus.AT_PICKUP_POINT, True),
+            _parcel("R", ParcelStatus.RETURNING, True),
+            _parcel("H", ParcelStatus.IN_TRANSIT, False),
+        ]
+    )
+    en_route = EvriEnRouteToPickupPointSensor(coordinator, _entry())
+    awaiting = EvriAwaitingPickupSensor(coordinator, _entry())
+    assert [p["barcode"] for p in en_route.extra_state_attributes["parcels"]] == ["E"]
+    assert [p["barcode"] for p in awaiting.extra_state_attributes["parcels"]] == ["A"]
