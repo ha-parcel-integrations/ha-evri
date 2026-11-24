@@ -39,6 +39,7 @@ A custom Home Assistant integration that tracks UK parcels and packages from [Ev
 - Summary sensors for incoming, outgoing, delivered and parcels ready for pickup
 - Read-only **Deliveries** calendar with the expected delivery windows
 - `evri.track_parcel` / `evri.untrack_parcel` services, so a dashboard button can add a parcel
+- A `contents` field on every parcel that you set yourself with `evri.update_contents`; it titles the calendar event and shows on the next-delivery sensor
 - Events + device triggers for no-code automations (parcel registered, status changed, delivered, delivery time changed)
 - Opt-in per-parcel status history
 - Manual refresh button and a diagnostic last-update sensor
@@ -162,8 +163,9 @@ Every payload is the full normalised parcel plus the hub's `device_id`. Events a
 
 | Service | Fields | Description |
 |---|---|---|
-| `evri.track_parcel` | `tracking_code`, optional `postal_code`, optional `direction` | Start tracking a parcel; postcode is required when several hubs exist |
+| `evri.track_parcel` | `tracking_code`, optional `postal_code`, optional `direction`, optional `contents` | Start tracking a parcel, and optionally set what is in it; postcode is required when several hubs exist |
 | `evri.untrack_parcel` | `tracking_code`, optional `postal_code` | Stop tracking a parcel; postcode is required when several hubs exist |
+| `evri.update_contents` | `tracking_code`, `contents` (empty clears it), optional `config_entry_id` | Set what is in a parcel, in your own words. It goes to every hub that lists the code, or to the one named by `config_entry_id` |
 
 ## Examples
 

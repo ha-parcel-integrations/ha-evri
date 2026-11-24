@@ -1,50 +1,192 @@
 {
   "title": "Evri",
   "config": {
-    "step": {"user": {"title": "Set up Evri", "description": "Create an Evri hub for a UK delivery postcode. You can add separate hubs for home, work or family.", "data": {"postal_code": "Postcode"}, "data_description": {"postal_code": "The delivery postcode used to retrieve the parcel details available to you."}}},
-    "error": {"invalid_postcode": "Enter a valid UK postcode."},
-    "abort": {"already_configured": "An Evri hub already exists for this postcode."}
+    "step": {
+      "user": {
+        "title": "Set up Evri",
+        "description": "Create an Evri hub for a UK delivery postcode. You can add separate hubs for home, work or family.",
+        "data": {
+          "postal_code": "Postcode"
+        },
+        "data_description": {
+          "postal_code": "The delivery postcode used to retrieve the parcel details available to you."
+        }
+      }
+    },
+    "error": {
+      "invalid_postcode": "Enter a valid UK postcode."
+    },
+    "abort": {
+      "already_configured": "An Evri hub already exists for this postcode."
+    }
   },
   "options": {
     "step": {
-      "init": {"title": "Evri options", "menu_options": {"incoming_parcels": "Incoming parcels", "outgoing_parcels": "Outgoing parcels", "settings": "Settings"}},
-      "incoming_parcels": {"title": "Manage incoming parcels", "description": "Tracking codes for parcels you are expecting.", "data": {"tracking_codes": "Tracking codes"}},
-      "outgoing_parcels": {"title": "Manage outgoing parcels", "description": "Tracking codes for parcels you sent.", "data": {"tracking_codes": "Tracking codes"}},
-      "settings": {"title": "Settings", "data": {"delivered_filter_type": "Filter by", "delivered_filter_amount": "Delivered parcels: amount", "include_history": "Include status history"}}
+      "init": {
+        "title": "Evri options",
+        "menu_options": {
+          "incoming_parcels": "Incoming parcels",
+          "outgoing_parcels": "Outgoing parcels",
+          "settings": "Settings"
+        }
+      },
+      "incoming_parcels": {
+        "title": "Manage incoming parcels",
+        "description": "Tracking codes for parcels you are expecting.",
+        "data": {
+          "tracking_codes": "Tracking codes"
+        }
+      },
+      "outgoing_parcels": {
+        "title": "Manage outgoing parcels",
+        "description": "Tracking codes for parcels you sent.",
+        "data": {
+          "tracking_codes": "Tracking codes"
+        }
+      },
+      "settings": {
+        "title": "Settings",
+        "data": {
+          "delivered_filter_type": "Filter by",
+          "delivered_filter_amount": "Delivered parcels: amount",
+          "include_history": "Include status history"
+        }
+      }
     },
-    "error": {"invalid_tracking_code": "The tracking code cannot be empty."}
+    "error": {
+      "invalid_tracking_code": "The tracking code cannot be empty."
+    }
   },
   "selector": {
-    "delivered_filter_type": {"options": {"days": "Days", "parcels": "Number of parcels"}},
-    "direction": {"options": {"incoming": "Incoming", "outgoing": "Outgoing"}}
+    "delivered_filter_type": {
+      "options": {
+        "days": "Days",
+        "parcels": "Number of parcels"
+      }
+    },
+    "direction": {
+      "options": {
+        "incoming": "Incoming",
+        "outgoing": "Outgoing"
+      }
+    }
   },
   "services": {
-    "track_parcel": {"name": "Track parcel", "description": "Start tracking an Evri parcel.", "fields": {
-      "tracking_code": {"name": "Tracking code", "description": "The Evri tracking code."},
-      "postal_code": {"name": "Postcode", "description": "The hub postcode. Required when multiple Evri hubs exist."},
-      "direction": {"name": "Direction", "description": "Whether you are receiving or sending this parcel."}
-    }},
-    "untrack_parcel": {"name": "Untrack parcel", "description": "Stop tracking an Evri parcel.", "fields": {
-      "tracking_code": {"name": "Tracking code", "description": "The Evri tracking code to stop tracking."},
-      "postal_code": {"name": "Postcode", "description": "The hub postcode. Required when multiple Evri hubs exist."}
-    }}
+    "track_parcel": {
+      "name": "Track parcel",
+      "description": "Start tracking an Evri parcel.",
+      "fields": {
+        "tracking_code": {
+          "name": "Tracking code",
+          "description": "The Evri tracking code."
+        },
+        "postal_code": {
+          "name": "Postcode",
+          "description": "The hub postcode. Required when multiple Evri hubs exist."
+        },
+        "direction": {
+          "name": "Direction",
+          "description": "Whether you are receiving or sending this parcel."
+        },
+        "contents": {
+          "name": "Contents",
+          "description": "What is in the parcel, in your own words. Calling this again for a tracked parcel replaces it; an empty text clears it."
+        }
+      }
+    },
+    "untrack_parcel": {
+      "name": "Untrack parcel",
+      "description": "Stop tracking an Evri parcel.",
+      "fields": {
+        "tracking_code": {
+          "name": "Tracking code",
+          "description": "The Evri tracking code to stop tracking."
+        },
+        "postal_code": {
+          "name": "Postcode",
+          "description": "The hub postcode. Required when multiple Evri hubs exist."
+        }
+      }
+    },
+    "update_contents": {
+      "name": "Update parcel contents",
+      "description": "Set what is in a parcel, in your own words, for a tracking code. An empty text clears it.",
+      "fields": {
+        "tracking_code": {
+          "name": "Tracking code",
+          "description": "The Evri tracking code."
+        },
+        "contents": {
+          "name": "Contents",
+          "description": "What is in the parcel, in your own words. An empty text clears it."
+        },
+        "config_entry_id": {
+          "name": "Account",
+          "description": "The account to store this for. Needed when no account lists the code yet."
+        }
+      }
+    }
   },
-  "device_automation": {"trigger_type": {
-    "parcel_registered": "A parcel was registered", "parcel_status_changed": "A parcel's status changed", "parcel_delivered": "A parcel was delivered", "parcel_delivery_time_changed": "A parcel's expected delivery time changed", "outgoing_parcel_status_changed": "An outgoing parcel's status changed", "outgoing_parcel_delivered": "An outgoing parcel was delivered"
-  }},
+  "device_automation": {
+    "trigger_type": {
+      "parcel_registered": "A parcel was registered",
+      "parcel_status_changed": "A parcel's status changed",
+      "parcel_delivered": "A parcel was delivered",
+      "parcel_delivery_time_changed": "A parcel's expected delivery time changed",
+      "outgoing_parcel_status_changed": "An outgoing parcel's status changed",
+      "outgoing_parcel_delivered": "An outgoing parcel was delivered"
+    }
+  },
   "entity": {
-    "button": {"refresh": {"name": "Refresh"}},
-    "calendar": {"deliveries": {"name": "Deliveries"}},
+    "button": {
+      "refresh": {
+        "name": "Refresh"
+      }
+    },
+    "calendar": {
+      "deliveries": {
+        "name": "Deliveries"
+      }
+    },
     "sensor": {
-      "incoming_parcels": {"name": "Incoming parcels", "unit_of_measurement": "parcels"},
-      "en_route_to_pickup_point": {"name": "En route to pickup point", "unit_of_measurement": "parcels"},
-      "awaiting_pickup": {"name": "Awaiting pickup", "unit_of_measurement": "parcels"},
-      "next_delivery": {"name": "Next delivery"},
-      "delivered_parcels": {"name": "Delivered parcels", "unit_of_measurement": "parcels"},
-      "outgoing_parcels": {"name": "Outgoing parcels", "unit_of_measurement": "parcels"},
-      "outgoing_delivered_parcels": {"name": "Outgoing delivered parcels", "unit_of_measurement": "parcels"},
-      "last_update": {"name": "Last successful update"},
-      "parcel": {"name": "Parcel {barcode}"}
+      "incoming_parcels": {
+        "name": "Incoming parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "en_route_to_pickup_point": {
+        "name": "En route to pickup point",
+        "unit_of_measurement": "parcels"
+      },
+      "awaiting_pickup": {
+        "name": "Awaiting pickup",
+        "unit_of_measurement": "parcels"
+      },
+      "next_delivery": {
+        "name": "Next delivery"
+      },
+      "delivered_parcels": {
+        "name": "Delivered parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "outgoing_parcels": {
+        "name": "Outgoing parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "outgoing_delivered_parcels": {
+        "name": "Outgoing delivered parcels",
+        "unit_of_measurement": "parcels"
+      },
+      "last_update": {
+        "name": "Last successful update"
+      },
+      "parcel": {
+        "name": "Parcel {barcode}"
+      }
+    }
+  },
+  "exceptions": {
+    "update_contents_entry_required": {
+      "message": "No account lists this code. Choose the account to store it for."
     }
   }
 }

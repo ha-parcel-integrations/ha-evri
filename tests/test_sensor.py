@@ -154,3 +154,10 @@ def test_en_route_and_awaiting_share_no_parcel():
     awaiting = EvriAwaitingPickupSensor(coordinator, _entry())
     assert [p["barcode"] for p in en_route.extra_state_attributes["parcels"]] == ["E"]
     assert [p["barcode"] for p in awaiting.extra_state_attributes["parcels"]] == ["A"]
+
+
+def test_next_delivery_attribute_has_contents():
+    parcel = _parcel("A", planned_from="2099-05-01T10:00:00Z")
+    parcel["contents"] = "Running shoes"
+    sensor = EvriNextDeliverySensor(_coordinator([parcel]), _entry())
+    assert sensor.extra_state_attributes["contents"] == "Running shoes"

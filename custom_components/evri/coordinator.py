@@ -13,7 +13,7 @@ import logging
 
 import aiohttp
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -35,6 +35,7 @@ from .const import (
     STAGGER_MINUTES,
     ParcelStatus,
 )
+from .contents import ContentsStore, normalize_code
 from .parcels import (
     apply_delivered_filter,
     normalize_parcel,
@@ -156,6 +157,10 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
             update_interval=timedelta(minutes=HOT_INTERVAL_MINUTES),
         )
         self._client = client
+        self.contents_store = ContentsStore(hass, entry.entry_id)
+        # Every (requested code, parcel) pair of the last poll, so a contents
+        # change can be laid over the published parcels without a fetch.
+        self._coded: list[tuple[str, dict]] = []
         self.delivered: list[dict] = []
         self.outgoing: list[dict] = []
         self.delivered_outgoing: list[dict] = []
@@ -201,6 +206,18 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
     def delivered_codes(self) -> set[str]:
         """Tracking codes currently skipped from the fetch (diagnostics only)."""
         return self._delivered_codes
+
+    @property
+    def known_codes(self) -> frozenset[str]:
+        """Codes this entry tracks: update_contents asks which entry owns a code."""
+        return frozenset(normalize_code(code) for code in self._tracked())
+
+    @callback
+    def async_apply_contents(self) -> None:
+        """Lay the stored contents over the published parcels, without a fetch."""
+        for code, parcel in self._coded:
+            parcel["contents"] = self.contents_store.get(code)
+        self.async_update_listeners()
 
     def _device_id(self) -> str | None:
         """Resolve (and cache) this entry's device id for event payloads."""
@@ -346,6 +363,12 @@ class EvriCoordinator(DataUpdateCoordinator[list[dict]]):
             (code, normalize_parcel(raw, include_history=include_history))
             for code, raw in raws_by_code.items()
         ]
+        # Precedence user > carrier > None; the carrier gives no contents yet.
+        for code, parcel in entries:
+            user_value = self.contents_store.get(code)
+            if user_value is not None:
+                parcel["contents"] = user_value
+        self._coded = entries
         # Rebuilt fresh from this cycle's data — a code whose payload just
         # flipped to delivered is skipped starting next cycle; one that
         # somehow un-delivers (should not happen, but the fetch list must

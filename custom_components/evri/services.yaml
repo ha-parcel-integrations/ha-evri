@@ -18,6 +18,11 @@ track_parcel:
           options:
             - incoming
             - outgoing
+    contents:
+      required: false
+      example: "Running shoes"
+      selector:
+        text:
 
 untrack_parcel:
   fields:
@@ -31,3 +36,21 @@ untrack_parcel:
       example: "SW1A 1AA"
       selector:
         text:
+
+update_contents:
+  fields:
+    tracking_code:
+      required: true
+      example: "H00AAA0000000001"
+      selector:
+        text:
+    contents:
+      required: false
+      example: "Running shoes"
+      selector:
+        text:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: evri

@@ -33,6 +33,7 @@ CANONICAL_KEYS = [
     "barcode",
     "sender",
     "receiver",
+    "contents",
     "status",
     "raw_status",
     "delivered",
@@ -214,3 +215,4 @@ def test_sort_and_delivered_filters():
 def test_capabilities_are_truthful():
     assert {"url", "history"} == CAPABILITIES
     assert CAPABILITIES <= KNOWN_CAPABILITIES
+    assert KNOWN_CAPABILITIES - {"contents"} >= CAPABILITIES
